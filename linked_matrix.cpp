@@ -7,16 +7,16 @@ namespace linked_matrix_GJK
  * implementation of class LMatrix
  */
     
-LMatrix::LMatrix(void) : root(new Mnode0())
+LMatrix::LMatrix(void) : root(new MNode0())
 {   
     // make root->down_link constant somehow
     join_lr(root, root);
 }
 
-LMatrix::LMatrix(bool **matrix, int m, int n) : root(new Mnode0())
+LMatrix::LMatrix(bool **matrix, int m, int n) : root(new MNode0())
 {   
     // create first column
-    Column c = Column(0);
+    MNode0 *c = new Column(0);
     join_lr(root,c);
     // create column header objects
     for(int j = 0; j < n; j++) {
@@ -26,22 +26,23 @@ LMatrix::LMatrix(bool **matrix, int m, int n) : root(new Mnode0())
     join_lr(c,root);
     
     // initialize m x n array of MNode0 pointers
-    MNode0 ***ptr_matrix = new (MNode0**)[m];
+    MNode0 ***ptr_matrix = new MNode0**[m];
     for(int k = 0; k < m; k++) {
-        ptr_matrix[k] = new (MNode0 *)[n]
+        ptr_matrix[k] = new MNode0*[n];
     }
     
     // create nodes of LMatrix, referenced by pointers in ptr_matrix
     // link the nodes vertically
     MNode0 *tmp;
-    for(c = root->right(), int j = 0; j < n; j++, c = c->right() ) {
+    c = root->right();
+    for( int j = 0; j < n; j++, c = c->right() ) {
         tmp = c;
         for(int i = 0; i < m; i++) {
             if(matrix[i][j]) {
                 ptr_matrix[i][j] = new MNode0();
                 join_du(ptr_matrix[i][j], tmp);
                 tmp = ptr_matrix[i][j];
-                c->set_size(c->size()+1);
+                (static_cast<Column *>(c))->set_size((static_cast<Column *>(c))->size()+1);
             } 
             else ptr_matrix[i][j] = NULL;
         }
@@ -93,8 +94,8 @@ void LMatrix::remove_row(MNode0 * node)
 void LMatrix::restore_row(MNode0 * node)
 {
     for(MNode0 *k = node; ; k = k->right()) {
-        k->up()->set_Down(k);
-        k->down()->set_Up(k);
+        k->up()->set_down(k);
+        k->down()->set_up(k);
         if( k->right() == node ) {break;}  // stop when we're back where we started
     }
 }
@@ -107,7 +108,7 @@ LMatrix::~LMatrix()
     // b iterates through each column vertically
     a = root->right();
     while(a != root) {
-        b = a->down;
+        b = a->down();
         while(b != a) {
             del = b;
             b = b->down();
@@ -124,6 +125,7 @@ LMatrix::~LMatrix()
 /***
  * Displays the matrix in a convenient visual form
  */
+ /*
 void LMatrix<T>::display(void)
 {
 	using std::cout;
@@ -132,7 +134,7 @@ void LMatrix<T>::display(void)
 	// fill array with symbols to be printed, by iterating over the nodes and using - & | for links
 	// print array
 }
-
+*/
 /*****************************************************************************************************
  * implementation of MNode operations
  */
