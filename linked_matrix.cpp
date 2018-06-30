@@ -17,16 +17,21 @@ LMatrix::LMatrix(void) : root( new MNode0( MData() ) )
 {   
     // make root->down_link constant somehow
     join_lr(root, root);
+    row_count = 0;
 }
 
 LMatrix::LMatrix(bool **matrix, int m, int n) : root( new MNode0( MData() ) )
 {   
+    if( m == 0 || n == 0 ) {
+        row_count = 0;
+        return;
+    }
     // create first column
     MNode0 *c = new Column(MData(), 0);
     c->data().column_id = static_cast<Column*>(c);        // point column object to itself
     join_lr(root,c);
     // create column header objects
-    for(int j = 0; j < n; j++) {
+    for(int j = 1; j < n; j++) {
         join_lr(c, new Column(MData(), 0) );
         c = c->right();
         c->data().column_id = static_cast<Column*>(c);
@@ -58,24 +63,43 @@ LMatrix::LMatrix(bool **matrix, int m, int n) : root( new MNode0( MData() ) )
         join_du(c, tmp);
     }
     
+    // ignore zero rows at the bottom of the matrix
+    int i;
+    bool zero_row;
+    for(i=m-1; i >= 0; i--) {
+        zero_row = 1;
+        for(int j = 0; j < n; j++) {
+            if(matrix[i][j]) {
+                zero_row = 0;
+                break;
+            }
+        }
+        if(!zero_row) break;
+    }
+    
+    // 'i' is now the index of the last non-zero row, or -1 if there are no non-zero rows
+    row_count = i + 1;
+
+    
     // link the nodes horizontally
-    MNode0 * first = NULL;
+    MNode0 * first, *prev;
     // i = row, j = column
-    for(int i = 0; i < m; i++) {
-        tmp = ptr_matrix[i][0];
-        for(int j = 1; j < n; j++ ) {
+    for(; i >= 0; i--) {
+        first = NULL;
+        for(int j = 0; j < n; j++ ) {
             // find first non-zero matrix entry in row i,
             // and make 'first' point to the corresponding node
-            if(tmp == NULL) {
-                tmp = ptr_matrix[i][j];
-                first = tmp;
-            } else if(ptr_matrix[i][j] != NULL) {
-                join_lr(tmp, ptr_matrix[i][j]);
-                tmp = ptr_matrix[i][j];
-            } 
+            if(ptr_matrix[i][j] != NULL) {
+                if( first == NULL) {
+                    first = ptr_matrix[i][j];
+                } else {
+                    join_lr(prev, ptr_matrix[i][j]);
+                }
+                prev = ptr_matrix[i][j];
+            }
         }
-        if(first != NULL) {  // if row i is not empty
-            join_lr(tmp, first);
+        if(first != NULL) {  // if row i is not a zero row
+            join_lr(prev, first);
         }
     }
     
@@ -99,6 +123,10 @@ bool LMatrix::is_trivial() const
     return root->right() == root && root->left() == root;
 }
 
+int LMatrix::num_rows() const
+{
+    return row_count;
+}
 
 /*
  * Removes the row of the 'LMatrix' object containing the node pointed to by 'node'
@@ -235,13 +263,11 @@ void DEBUG_display(LMatrix& M)
 
     MNode0 *node = M.head()->right();
     assert( node->left() == M.head() );
-    int Nrows = 0;  // number of rows
     while( node != M.head() ) {
         assert( node->data().row_id == -1 );
         assert( node->right() != NULL );
         assert( node == node->right()->left() );
         cout << l << C << r;
-        if(static_cast<Column*>(node)->size() > Nrows) Nrows = static_cast<Column*>(node)->size();
         node = node->right();
     }
     cout << ind << "row " << -1 << endl;
@@ -249,7 +275,7 @@ void DEBUG_display(LMatrix& M)
     int rownum = 0;
     MNode0 *colhead;
     MNode0 *prev, *first;
-    while(rownum < Nrows) {
+    while(rownum < M.num_rows() ) {
         cout << ind << sp << sp << sp;
         colhead = M.head()->right();
         prev = NULL;
@@ -257,7 +283,9 @@ void DEBUG_display(LMatrix& M)
             node = colhead->down();
             while(node != colhead && node->data().row_id != rownum) {
                 assert(node != NULL);
+                assert(node->down() != NULL);
                 assert(node->down()->up() == node);
+                assert(node->data().column_id == colhead);
                 node = node->down();
             }
             if(node == colhead) {
@@ -266,15 +294,18 @@ void DEBUG_display(LMatrix& M)
                 if(prev != NULL) {
                     assert(prev->right() == node);
                     assert(node->left() == prev);
-                } else first = node;
+                } else {
+                    first = node;
+                }
                 cout << l << N << r;
                 prev = node;
             }
-            
             colhead = colhead->right();
         }
-        assert(prev->right() == first);
-        assert(first->left() == prev);
+        if(prev != NULL) {
+            assert(prev->right() == first);
+            assert(first->left() == prev);
+        }
         cout << ind << "row " << rownum << endl;
         rownum++;
     }
@@ -285,6 +316,7 @@ void DEBUG_display(LMatrix& M)
     node = M.head()->right();
     while(node != M.head()) {
         cout << l << static_cast<Column*>(node)->size() << r;
+        node = node->right();
     }
     cout << endl;
 }

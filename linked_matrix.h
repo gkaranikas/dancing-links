@@ -37,6 +37,7 @@ public:
     LMatrix(bool **matrix, int m, int n);
     MNode0* head() const;
     bool is_trivial() const;
+    int num_rows() const;
     void remove_row(MNode0 *node);
     void restore_row(MNode0 *node);
     void remove_column(MNode0 *node);
@@ -44,6 +45,7 @@ public:
     ~LMatrix();
 private:
     MNode0 *root;
+    int row_count;
 };
 
 void DEBUG_display(LMatrix&);

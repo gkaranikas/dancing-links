@@ -16,7 +16,13 @@ const bool TESTS[NUM_TESTS] = {1,1,1};  // will determine whether a given test i
 /****************************************************************************************************
  *                                   IMPLEMENTATION OF TESTS
  * **************************************************************************************************/
-
+// TEST CASES
+// empty matrix
+// zero matrix
+// ones matrix
+// single column/single row matrix
+// non-zero matrix with zero rows
+// non-zero matrix with trailing zero rows
 
 void test0()
 {
