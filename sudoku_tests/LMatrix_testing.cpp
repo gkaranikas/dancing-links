@@ -1,6 +1,7 @@
 #include <iostream>
 #include <assert.h>
 #include <cstdlib>
+#include <ctime>
 
 #include "../linked_matrix.h"
 using linked_matrix_GJK::LMatrix;
@@ -181,6 +182,7 @@ void test_random()
 {
     int m = 8, n = 7;
     bool **matrix = new bool*[m];
+    srand((int) time(0));
     bool matrix_list[8*7];
     for(int k = 0; k < m*n; k++) matrix_list[k] = (bool) (rand() % 2);
     matrix_creator(matrix,m,n,matrix_list);
