@@ -270,7 +270,7 @@ void DEBUG_display(LMatrix& M)
         cout << l << C << r;
         node = node->right();
     }
-    cout << ind << "row " << -1 << endl;
+    cout << ind << ind << "row " << -1 << endl;
     
     int rownum = 0;
     MNode0 *colhead;
@@ -306,7 +306,7 @@ void DEBUG_display(LMatrix& M)
             assert(prev->right() == first);
             assert(first->left() == prev);
         }
-        cout << ind << "row " << rownum << endl;
+        cout << ind << ind << "row " << rownum << endl;
         rownum++;
     }
     
