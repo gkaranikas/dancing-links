@@ -36,11 +36,6 @@ void downdate(LMatrix& M, S_Stack& solution, H_Stack& history);
 
 void Exact_Cover_Solver(bool **matrix, int m, int n, bool *solution_rows) throw (std::string)
 {   
-    {
-        while(!solution.empty()) {
-            solution_rows[solution.pop()] = 1;
-        }
-    }
     LMatrix M = LMatrix(matrix, m, n);
     S_Stack solution = S_Stack();
     H_Stack history = H_Stack();
