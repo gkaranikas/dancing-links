@@ -159,56 +159,36 @@ void LMatrix::restore_row(MNode0 * node)
         k->data().column_id->add_to_size(1);
         k = k->left();
     } while( k != node );
-    
 }
 
 
 /*
  * Removes the column of the 'LMatrix' object containing the node pointed to by 'node'
- * Postcondition: the left, right, up, down links of nodes in the row are unchanged
+ * Postcondition: the left, right, up, down links of nodes in the column are unchanged
  */
 void LMatrix::remove_column(MNode0 * node)
 {   
-    if( node == NULL || node == root ) return;
-    Column *c = node->data().column_id;
+    if(node == NULL || node == root ) return;
     MNode0 *k = node;
     do {
-        if( k == static_cast<MNode0 *>(c) ) {
-            k = k->up();
-            continue;
-        }
-        join_lr( k->left(), k->right() );      
+        join_lr( k->left(), k->right() ); 
         k = k->up();
     } while( k != node ); // stop when we're back where we started
-    join_du(c,c);
-    c->set_size(0);
 }
 
 /*
  * Undoes the operations of 'remove_row'
  * Precondition: 'node' points to a row which has been removed via a call to 'remove_row',
  *               and neither the row nor the calling object have been altered since.
- *               In particular 'node' is not a column header
  */
 void LMatrix::restore_column(MNode0 * node)
-{   
-    Column *c = node->data().column_id;
-    if(c == node) return;
+{
     MNode0 *k = node;
-    while(k->down() != c) k = k->down();
-    c->set_up(k);
-    k = node;
-    while(k->up() != c) k = k->up();
-    c->set_down(k);
-    // now we have inserted the column header back into the appropriate circular linked lists
-    
-    k = c->down();
-    while( k != c ) {
+    do {
         k->right()->set_left(k);
         k->left()->set_right(k);
-        c->add_to_size(1);
         k = k->down();
-    }
+    } while( k != node );
 }
 
 

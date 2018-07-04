@@ -1,10 +1,11 @@
 #include <iostream>
 #include <string>
+#include <vector>
 
 #include <stack>
 #include "linked_matrix.h"
 
-#include "dancing_links.h"
+//#include "sudoku_solver.h"
 
 /** 
  *  an implementation of Donald Knuth's Dancing Links algorithm
@@ -12,7 +13,7 @@
  *  https://en.wikipedia.org/wiki/Dancing_Links
  */
 
-typedef stack<int> S_Stack;
+typedef std::vector<int> S_Stack;
 
 enum RC {_row_, _column_};
 struct RC_Item {
@@ -30,22 +31,19 @@ typedef linked_matrix_GJK::Column Column;
 /* function declarations */
 bool DLX(LMatrix& M, S_Stack& solution, H_Stack& history);
 Column* choose_column(LMatrix& M);
-void update(LMatrix& M, S_Stack& solution, H_Stack& history, const Node *r);
+void update(LMatrix& M, S_Stack& solution, H_Stack& history, Node *r);
 void downdate(LMatrix& M, S_Stack& solution, H_Stack& history);
 
 
-void Exact_Cover_Solver(bool **matrix, int m, int n, bool *solution_rows) throw (std::string)
+std::vector<int> Exact_Cover_Solver(bool **matrix, int m, int n)
 {   
-    LMatrix M = LMatrix(matrix, m, n);
-    S_Stack solution = S_Stack();
-    H_Stack history = H_Stack();
-    if( DLX(M, solution, history) ) {
-        for(int i=0; i < m; i++) solution_rows[i] = 0;
-        while(!solution.empty()) {
-            solution_rows[solution.pop()] = 1;
-        }
-        //return solution_rows;
-    } else throw "No solution exists";
+    LMatrix M(matrix, m, n);
+    H_Stack history;
+    std::vector<int> solution;
+    solution.reserve(m);
+    DLX(M, solution, history);
+    solution.shrink_to_fit();
+    return solution;
 }
 
 // could adjust algorithm to find all solutions
@@ -87,15 +85,15 @@ Column* choose_column(LMatrix& M)
 {
     if( M.is_trivial() ) return NULL;
     
-    Node* node = (M.head())->right();
-    Column* max_col = static_cast<Column>(node);
-    Column* c;
-    while( node != M.head() )
-    {
-        if( (c=static_cast<Column>(node))->size() > max_col->size() ) {
-            max_col = c;
+    Column* col = static_cast<Column*>(M.head()->right());
+    Column* max_col = col;
+
+    while( col != M.head() )
+    {   
+        if( col->size() > max_col->size() ) {
+            max_col = col;
         }
-        node = node->right();
+        col = static_cast<Column*>(col->right());
     }
     return max_col;
 }
@@ -103,13 +101,13 @@ Column* choose_column(LMatrix& M)
 /*
  * 
  */
-void update(LMatrix& M, S_Stack& solution, H_Stack& history, const Node *r) 
+void update(LMatrix& M, S_Stack& solution, H_Stack& history, Node *r) 
 {
-    solution.push(r->data().row_id);
+    solution.push_back(r->data().row_id);
     
-    RC_Stack temp_stack = RC_Stack();
+    RC_Stack temp_stack;
     RC_Item temp_item;
-    Node *j = r;
+    Node * j = r;
     do {
         Node *i = j;
         do {
@@ -119,7 +117,7 @@ void update(LMatrix& M, S_Stack& solution, H_Stack& history, const Node *r)
             temp_stack.push(temp_item);
             i = i->up();
         } while( i != j );
-        M.remove_column(j);  // could be NULL ?
+        M.remove_column(j);
         temp_item.node = j;
         temp_item.type = _column_;
         temp_stack.push(temp_item);
@@ -137,10 +135,10 @@ void downdate(LMatrix& M, S_Stack& solution, H_Stack& history)
     if( history.empty() ) {
         return;
     }
-    solution.pop();
+    solution.pop_back();
     RC_Stack last = history.top();
     RC_Item it;
-    do {
+    while( !last.empty() ) {
         it = last.top();
         if( it.type == _row_ ) {
             M.restore_row(it.node);
@@ -148,6 +146,6 @@ void downdate(LMatrix& M, S_Stack& solution, H_Stack& history)
             M.restore_column(it.node);
         }
         last.pop();
-    } while( !last.empty() );
+    }
     history.pop();
 }
