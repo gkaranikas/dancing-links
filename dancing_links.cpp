@@ -13,6 +13,10 @@
  *  https://en.wikipedia.org/wiki/Dancing_Links
  */
 
+typedef linked_matrix_GJK::MNode0 Node;
+typedef linked_matrix_GJK::LMatrix LMatrix;
+typedef linked_matrix_GJK::Column Column;
+
 typedef std::vector<int> S_Stack;
 
 enum RC {_row_, _column_};
@@ -20,12 +24,10 @@ struct RC_Item {
     Node* node;
     RC type;
 };
-typedef stack<RC_Item> RC_Stack;
-typedef stack<RC_Stack> H_Stack;
+typedef std::stack<RC_Item> RC_Stack;
+typedef std::stack<RC_Stack> H_Stack;
 
-typedef linked_matrix_GJK::MNode0 Node;
-typedef linked_matrix_GJK::LMatrix LMatrix;
-typedef linked_matrix_GJK::Column Column;
+
 
 
 /* function declarations */
@@ -67,11 +69,11 @@ bool DLX(LMatrix& M, S_Stack& solution, H_Stack& history)
         return 1;
     }
     for( Node *r = c->down(); r != static_cast<Node*>(c); r = r->down() ) {
-        update_matrix(M, solution, history, r);
+        update(M, solution, history, r);
         if( DLX(M, solution, history) ) { 
             return 1;     
         } else {
-            downdate_matrix(M, solution, history);
+            downdate(M, solution, history);
         }
     }
     // no solution exists
@@ -107,25 +109,36 @@ void update(LMatrix& M, S_Stack& solution, H_Stack& history, Node *r)
     
     RC_Stack temp_stack;
     RC_Item temp_item;
-    Node * j = r;
-    do {
-        Node *i = j;
-        do {
-            M.remove_row(i);
-            temp_item.node = i;
+
+    for(Node * i = r->right(); i != r; i = i->right()) {
+        for(Node *j = i->up(); j != i; j = j->up() ) {
+            if(j->data().column_id == j) continue;
+            M.remove_row(j);
+            temp_item.node = j;
             temp_item.type = _row_;
             temp_stack.push(temp_item);
-            i = i->up();
-        } while( i != j );
-        M.remove_column(j);
-        temp_item.node = j;
+        }
+        M.remove_column(i);
+        temp_item.node = i;
         temp_item.type = _column_;
         temp_stack.push(temp_item);
-        j = j->right();
-    } while( j != r);
+    }
+    
+    for(Node *j = r->up(); j != r; j = j->up() ) {
+        if(j->data().column_id == j) continue;
+        M.remove_row(j);
+        temp_item.node = j;
+        temp_item.type = _row_;
+        temp_stack.push(temp_item);
+    }
+    M.remove_column(r);
+    temp_item.node = r;
+    temp_item.type = _column_;
+    temp_stack.push(temp_item);
     
     history.push(temp_stack);
 }
+
 
 /*
  * Undoes the operations of 'update'
