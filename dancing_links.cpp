@@ -7,6 +7,9 @@
 
 //#include "sudoku_solver.h"
 
+namespace dancing_links_GJK
+{
+
 /** 
  *  an implementation of Donald Knuth's Dancing Links algorithm
  *  https://arxiv.org/pdf/cs/0011047.pdf
@@ -61,6 +64,39 @@ std::vector<int> Exact_Cover_Solver(bool **matrix, int m, int n)
  *      Go to 1.
  * 
  */
+ 
+ 
+ 
+         /*******************************
+         * * * * * * D E B U G * * * * * 
+         * *****************************/
+            typedef int num_t;       // range understood to be restricted to 1,2,...9 (replace 9 with 'size' in general)
+const num_t no_value = 0;
+
+struct Triple {
+    num_t row;
+    num_t column;
+    num_t value;
+};
+         
+    Triple index_to_triple(int index, int size) {
+    // index = (a-1)*size^2 + (b-1)*size + (c-1)
+    // need to find a,b, and c
+    Triple triple;
+    std::div_t dv = std::div(index,size);
+    triple.value = dv.rem + 1;         // c = index % size + 1, etc
+    dv = std::div(dv.quot,size);
+    triple.column = dv.rem + 1;
+    triple.row = dv.quot + 1;
+    return triple;
+}
+         /*******************************
+         * * * * * * D E B U G * * * * * 
+         * *****************************/
+
+ 
+ 
+ 
 bool DLX(LMatrix& M, S_Stack& solution, H_Stack& history)
 {
     Column *c = choose_column(M);
@@ -70,10 +106,97 @@ bool DLX(LMatrix& M, S_Stack& solution, H_Stack& history)
     }
     for( Node *r = c->down(); r != static_cast<Node*>(c); r = r->down() ) {
         update(M, solution, history, r);
+        /*******************************
+         * * * * * * D E B U G * * * * * 
+         * *****************************/
+    {
+
+
+int grid_0[9] = {0,0,0,0,0,0,0,0,0};
+int grid_1[9] = {0,0,0,0,0,0,0,0,0};
+int grid_2[9] = {0,0,0,0,0,0,0,0,0};
+int grid_3[9] = {0,0,0,0,0,0,0,0,0};
+int grid_4[9] = {0,0,0,0,0,0,0,0,0};
+int grid_5[9] = {0,0,0,0,0,0,0,0,0};
+int grid_6[9] = {0,0,0,0,0,0,0,0,0};
+int grid_7[9] = {0,0,0,0,0,0,0,0,0};
+int grid_8[9] = {0,0,0,0,0,0,0,0,0};
+int* grid[9] = {grid_0,grid_1,grid_2,grid_3,grid_4,grid_5,grid_6,grid_7,grid_8};
+
+    int size = 9;
+    
+    int index;
+    Triple triple;
+    int s = solution.size(),t = 0;
+    while(t < s) {
+        index = solution[t];
+        triple = index_to_triple(index,size);
+        grid[triple.row-1][triple.column-1] = triple.value;
+        t++;
+    }
+    
+    //std::cout << '\t' << "SUDOKU GRID" << std::endl << std::endl;
+    for(int i = 0; i < size; i++) {
+        std::cout << '\t';
+        for(int j = 0; j < size; j++) {
+            std::cout << grid[i][j] << " ";
+        }
+        std::cout << std::endl;
+    }
+    std::cout << std::endl;
+    }
+        /*******************************
+         * * * * * * D E B U G * * * * * 
+         * *****************************/
         if( DLX(M, solution, history) ) { 
             return 1;     
         } else {
             downdate(M, solution, history);
+            
+            
+         /*******************************
+         * * * * * * D E B U G * * * * * 
+         * *****************************/
+    {
+
+int grid_0[9] = {0,0,0,0,0,0,0,0,0};
+int grid_1[9] = {0,0,0,0,0,0,0,0,0};
+int grid_2[9] = {0,0,0,0,0,0,0,0,0};
+int grid_3[9] = {0,0,0,0,0,0,0,0,0};
+int grid_4[9] = {0,0,0,0,0,0,0,0,0};
+int grid_5[9] = {0,0,0,0,0,0,0,0,0};
+int grid_6[9] = {0,0,0,0,0,0,0,0,0};
+int grid_7[9] = {0,0,0,0,0,0,0,0,0};
+int grid_8[9] = {0,0,0,0,0,0,0,0,0};
+int* grid[9] = {grid_0,grid_1,grid_2,grid_3,grid_4,grid_5,grid_6,grid_7,grid_8};
+
+
+    int size = 9;
+    
+    int index;
+    Triple triple;
+    int s = solution.size(),t = 0;
+    while(t < s) {
+        index = solution[t];
+        triple = index_to_triple(index,size);
+        grid[triple.row-1][triple.column-1] = triple.value;
+        t++;
+    }
+    
+    //std::cout << '\t' << "SUDOKU GRID" << std::endl << std::endl;
+    for(int i = 0; i < size; i++) {
+        std::cout << '\t';
+        for(int j = 0; j < size; j++) {
+            std::cout << grid[i][j] << " ";
+        }
+        std::cout << std::endl;
+    }
+    std::cout << std::endl;
+    }
+        /*******************************
+         * * * * * * D E B U G * * * * * 
+         * *****************************/
+            
         }
     }
     // no solution exists
@@ -161,4 +284,7 @@ void downdate(LMatrix& M, S_Stack& solution, H_Stack& history)
         last.pop();
     }
     history.pop();
+}
+
+
 }

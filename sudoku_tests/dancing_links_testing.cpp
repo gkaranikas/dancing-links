@@ -229,7 +229,8 @@ const PROC tests[NUM_TESTS] = {
 &test_update_downdate,
 &test_0,
 &test_1,
-&test_2
+&test_2,
+&test_big_random_matrix
 };
 
 // run all tests
