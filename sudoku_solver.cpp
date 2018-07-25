@@ -72,7 +72,7 @@ void get_exact_cover_matrix(num_t **grid, int sqrt_of_size, bool** matrix) {
     
     Triple triple;
     std::div_t dv;
-    int condition_type;
+    enum class Conditions {row=0, column=1, square=2, point=3} condition_type;
     for(int i = 0; i < m; i++) {
         triple = index_to_triple(i, size);
         if(grid[triple.row-1][triple.column-1] != no_value && grid[triple.row-1][triple.column-1] != triple.value)
@@ -85,48 +85,27 @@ void get_exact_cover_matrix(num_t **grid, int sqrt_of_size, bool** matrix) {
                         // this is not incorporated yet
             for(int j = 0; j < n; j++) {
                 dv = std::div(j,size*size);
-                condition_type = dv.quot;     // between 0 and 3 inclusive
+                condition_type = (Conditions)dv.quot;     // between 0 and 3 inclusive
                 dv = std::div(dv.rem,size);
-                if(condition_type == 0) {        // row conditions
+                if(condition_type == Conditions::row) { 
                     num_t row = dv.quot+1, value = dv.rem+1;
                     matrix[i][j] = triple.row == row && triple.value == value;
                 } 
-                else if(condition_type == 1) {   // column conditions
+                else if(condition_type == Conditions::column) {
                     num_t column = dv.quot+1, value = dv.rem+1;
                     matrix[i][j] = triple.column == column && triple.value == value;
                 } 
-                else if(condition_type == 2) {    // square conditions
+                else if(condition_type == Conditions::square) {
                     num_t square = dv.quot+1, value = dv.rem+1;
                     matrix[i][j] = is_in_square(triple,square,sqrt_of_size) && triple.value == value;
                 } 
-                else if(condition_type == 3) {   // point conditions
+                else if(condition_type == Conditions::point) {
                     num_t row = dv.quot+1, column = dv.rem+1;
                     matrix[i][j] = triple.row == row && triple.column == column;
                 }
             }
         }
     }
- /*   
-    // incorporate specific sudoku problem data
-    for(num_t row = 1; row <= size; row++) {
-        for(num_t column = 1; column <= size; column++) {
-            num_t value = grid[i][j];
-            if( value != 0) {       // a value of 0 means the grid point is blank (ie unknown value)
-                triple.row = row;
-                triple.column = column;
-                triple.value = 1;
-                for(triple.value = 1; triple.value <= size; triple.value++) {
-                    if(triple.value != value) {
-                        int i = triple_to_index(triple,size);
-                        for(int j = 0; j < n; j++) {
-                            matrix[i][j] = 0;
-                        }
-                    }
-                }
-            }
-        }
-    } 
-*/
     
 }
 // skip the boolean matrix step altogether

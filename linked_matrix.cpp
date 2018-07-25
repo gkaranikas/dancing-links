@@ -3,7 +3,7 @@
 // for 'DEBUG_display()'
 #include <cassert>
 #include <iostream>
-using std::cout;
+#include <fstream>
 using std::endl;
 
 namespace linked_matrix_GJK
@@ -225,7 +225,7 @@ LMatrix::~LMatrix()
 //  >C<      >N<    col 1
 //  >C<>N<   >N<    col 2
 
-void DEBUG_display(LMatrix& M)
+void DEBUG_display(LMatrix& M, std::ostream& ofs)
 {   
     const char l = '>';
     const char d = '<';
@@ -236,10 +236,10 @@ void DEBUG_display(LMatrix& M)
     const char N = 'N';
     const char ind = '\t';
     const char sp = ' ';
-    cout << ind << "ROW DIAGRAM" << endl << endl;
+    ofs << ind << "ROW DIAGRAM" << endl << endl;
     
-    cout << ind;
-    cout << l << H << r;
+    ofs << ind;
+    ofs << l << H << r;
 
     MNode0 *node = M.head()->right();
     assert( node->left() == M.head() );
@@ -247,16 +247,16 @@ void DEBUG_display(LMatrix& M)
         assert( node->data().row_id == -1 );
         assert( node->right() != NULL );
         assert( node == node->right()->left() );
-        cout << l << C << r;
+        ofs << l << C << r;
         node = node->right();
     }
-    cout << ind << ind << "row " << -1 << endl;
+    ofs << ind << ind << "row " << -1 << endl;
     
     int rownum = 0;
     MNode0 *colhead;
     MNode0 *prev, *first;
     while(rownum < M.num_rows() ) {
-        cout << ind << sp << sp << sp;
+        ofs << ind << sp << sp << sp;
         colhead = M.head()->right();
         prev = NULL;
         while(colhead != M.head()) {
@@ -269,7 +269,7 @@ void DEBUG_display(LMatrix& M)
                 node = node->down();
             }
             if(node == colhead) {
-                cout << sp << sp << sp;
+                ofs << sp << sp << sp;
             } else if(node->data().row_id == rownum) {
                 if(prev != NULL) {
                     assert(prev->right() == node);
@@ -277,7 +277,7 @@ void DEBUG_display(LMatrix& M)
                 } else {
                     first = node;
                 }
-                cout << l << N << r;
+                ofs << l << N << r;
                 prev = node;
             }
             colhead = colhead->right();
@@ -286,19 +286,19 @@ void DEBUG_display(LMatrix& M)
             assert(prev->right() == first);
             assert(first->left() == prev);
         }
-        cout << ind << ind << "row " << rownum << endl;
+        ofs << ind << ind << "row " << rownum << endl;
         rownum++;
     }
     
-    cout << endl << endl;
-    cout << ind << "COLUMN SIZE FIELDS" << endl << endl;
-    cout << ind;
+    ofs << endl << endl;
+    ofs << ind << "COLUMN SIZE FIELDS" << endl << endl;
+    ofs << ind;
     node = M.head()->right();
     while(node != M.head()) {
-        cout << l << static_cast<Column*>(node)->size() << r;
+        ofs << l << static_cast<Column*>(node)->size() << r;
         node = node->right();
     }
-    cout << endl;
+    ofs << endl;
 }
 
 

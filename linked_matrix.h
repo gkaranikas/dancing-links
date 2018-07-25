@@ -1,6 +1,7 @@
 #ifndef LINKED_MATRIX_H
 #define LINKED_MATRIX_H
 
+#include <iostream>
 #include <string>
 
 //namespace 
@@ -48,7 +49,7 @@ private:
     int row_count;
 };
 
-void DEBUG_display(LMatrix&);
+void DEBUG_display(LMatrix& M, std::ostream& ofs=std::cout);
 
 template<class T>
 class MNode
@@ -80,16 +81,16 @@ private:
 class Column : public MNode0
 {
 public:
-    Column(const MData& theData, int theSize=0, ::std::string theName="") 
+    Column(const MData& theData, int theSize=0, std::string theName="") 
         : MNode0(theData), _size(theSize), _name(theName) {}
     int size() const {return _size;}
     void set_size(int N) {_size = N;}
     void add_to_size(int N) {_size += N;}
-    ::std::string name() const {return _name;}
-    void set_name(::std::string S) {_name = S;}
+    std::string name() const {return _name;}
+    void set_name(std::string S) {_name = S;}
 private:
     int _size;
-    ::std::string _name;
+    std::string _name;
 };
 
 

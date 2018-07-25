@@ -98,7 +98,18 @@ void test_0()
 
 void test_1()
 {
-    
+    const int sqrt_of_size = 2;
+    const int size = 4;
+    int flat_grid[size*size] = {
+        1,0,4,0,
+        0,0,0,0,
+        0,2,0,1,
+        3,0,0,0
+    };
+ //   int solved_grid[size*size] = {
+ //   };
+    run_test(flat_grid,sqrt_of_size);
+
 }
 
 void test_2()

@@ -1,12 +1,8 @@
 #include <iostream>
+#include <fstream>
 #include <cassert>
 #include <cstdlib>
 #include <ctime>
-#include <vector>
-
-//#include "../sudoku_solver.h"
-std::vector<int> Exact_Cover_Solver(bool **matrix, int m, int n);
-
 
 #include "../linked_matrix.h"
 using linked_matrix_GJK::LMatrix;
@@ -14,7 +10,17 @@ using linked_matrix_GJK::MNode0;
 using linked_matrix_GJK::Column;
 using linked_matrix_GJK::DEBUG_display;
 
-#define NUM_TESTS 4
+#include <vector>
+#include <stack>
+#include "../dancing_links.h"
+using dancing_links_GJK::choose_column;
+using dancing_links_GJK::update;
+using dancing_links_GJK::downdate;
+using dancing_links_GJK::DLX;
+#include "../sudoku_solver.h"
+using dancing_links_GJK::Exact_Cover_Solver;
+
+#define NUM_TESTS 7
 
 /****************************************************************************************************
  *                                   IMPLEMENTATION OF TESTS
@@ -72,21 +78,6 @@ void print_solution(std::vector<int>& solution) {
     std::cout << std::endl;
 }
 
-#include <stack>
-typedef std::vector<int> S_Stack;
-
-enum RC {_row_, _column_};
-struct RC_Item {
-    MNode0* node;
-    RC type;
-};
-typedef std::stack<RC_Item> RC_Stack;
-typedef std::stack<RC_Stack> H_Stack;
-
-bool DLX(LMatrix& M, S_Stack& solution, H_Stack& history);
-Column* choose_column(LMatrix& M);
-void update(LMatrix& M, S_Stack& solution, H_Stack& history, MNode0 *r);
-void downdate(LMatrix& M, S_Stack& solution, H_Stack& history);
 
 void cont(void) {
     std::cout << std::endl << "continue? [Y/n]";
@@ -114,8 +105,8 @@ void test_update_downdate()
     
     Column* c = choose_column(M);
     assert( c == M.head()->right());
-    S_Stack solution;
-    H_Stack history;
+    dancing_links_GJK::S_Stack solution;
+    dancing_links_GJK::H_Stack history;
     MNode0* r = c->down();
     update(M,solution,history,r);
     DEBUG_display(M);
@@ -163,6 +154,7 @@ void test_0()
     std::vector<int> solution = Exact_Cover_Solver(matrix,m,n);
     std::cout << std::endl << '\t' << "SOLUTION" << std::endl << std::endl;
     print_solution(solution);
+    matrix_deletor(matrix,m,n);
     std::cout << std::endl << "Is output correct? [Y/n]";
     char in;
     std::cin >> in;
@@ -184,6 +176,7 @@ void test_1()
     std::vector<int> solution = Exact_Cover_Solver(matrix,m,n);
     std::cout << std::endl << '\t' << "SOLUTION" << std::endl << std::endl;
     print_solution(solution);
+    matrix_deletor(matrix,m,n);
     std::cout << std::endl << "Is output correct? [Y/n]";
     char in;
     std::cin >> in;
@@ -211,10 +204,81 @@ do {
     std::vector<int> solution = Exact_Cover_Solver(matrix,m,n);
     std::cout << std::endl << '\t' << "SOLUTION" << std::endl << std::endl;
     print_solution(solution);
+    matrix_deletor(matrix,m,n);
     std::cout << std::endl << "Is output correct? [Y/n]";
     char in;
     std::cin >> in;
     assert( in == 'y' || in == 'Y');
+} while(continue_prompt());
+}
+
+
+void test_big_random_matrix()
+{
+    do {
+    int m = 729, n = 4*81;
+    bool **matrix = new bool*[m];
+    srand((int) time(0));
+    bool flat_matrix[m*n];
+    for(int k = 0; k < m*n; k++) flat_matrix[k] = (bool) (rand() % 4 != 0);
+
+    matrix_creator(matrix,m,n,flat_matrix);
+    //matrix_printer(matrix,m,n);
+    std::vector<int> solution = Exact_Cover_Solver(matrix,m,n);
+    std::cout << std::endl << '\t' << "SOLUTION" << std::endl << std::endl;
+    print_solution(solution);
+    matrix_deletor(matrix,m,n);
+} while(continue_prompt());
+}
+
+
+void test_big_soluble_matrix()
+{
+    do {
+    int m = 729, n = 4*81;
+    bool **matrix = new bool*[m];
+    srand((int) time(0));
+    bool flat_matrix[m*n];
+    int k = 0;
+    for(; k < 4*81*400; k++) flat_matrix[k] = (bool) (rand() % 4 != 0);
+    for(; k < 4*81*400 + 4*81; k++) flat_matrix[k] = 1;        // this row is the (a) solution
+    for(; k < m*n; k++) flat_matrix[k] = (bool) (rand() % 4 != 0);
+
+    matrix_creator(matrix,m,n,flat_matrix);
+    //matrix_printer(matrix,m,n);
+    std::vector<int> solution = Exact_Cover_Solver(matrix,m,n);
+    std::cout << std::endl << '\t' << "SOLUTION" << std::endl << std::endl;
+    print_solution(solution);
+    matrix_deletor(matrix,m,n);
+    } while(continue_prompt());
+}
+
+void test_sparse_matrix()
+{
+    do {
+        int m = 729, n = 4*81;
+        bool **matrix = new bool*[m];
+        srand((int) time(0));
+        for(int i = 0; i < m; i++) {
+            matrix[i] = new bool[n];
+            for(int j = 0; j < n; j++) {
+            matrix[i][j] = 0;
+            }
+            matrix[i][(rand() % 81)] = 1;
+            matrix[i][81 + (rand() % 81)] = 1;
+            matrix[i][2*81 + (rand() % 81)] = 1;
+            matrix[i][3*81 + (rand() % 81)] = 1;
+        }
+
+    //matrix_printer(matrix,m,n);
+    LMatrix M(matrix,m,n);
+//    std::ofstream ofs(".\\lmatrix.txt",std::ofstream::app);
+//    DEBUG_display(M,ofs);
+//    ofs.close();
+    std::vector<int> solution = Exact_Cover_Solver(matrix,m,n);
+    std::cout << std::endl << '\t' << "SOLUTION" << std::endl << std::endl;
+    print_solution(solution);
+    matrix_deletor(matrix,m,n);
 } while(continue_prompt());
 }
 
@@ -230,14 +294,17 @@ const PROC tests[NUM_TESTS] = {
 &test_0,
 &test_1,
 &test_2,
-&test_big_random_matrix
+&test_big_random_matrix,
+&test_big_soluble_matrix,
+&test_sparse_matrix
 };
 
 // run all tests
 int main() {
     bool TESTS[NUM_TESTS];  // will determine whether a given test is to be run or omitted
-    for(int i = 0; i < NUM_TESTS; i++) TESTS[i] = 1;
+    for(int i = 0; i < NUM_TESTS; i++) TESTS[i] = 0;
     TESTS[0] = 0;
+    TESTS[6] = 1;
     
 	for(int i = 0; i < NUM_TESTS; i++) {
 		if(TESTS[i]) {
