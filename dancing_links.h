@@ -2,7 +2,7 @@
 namespace dancing_links_GJK
 {
 
-typedef linked_matrix_GJK::MNode0 Node;
+typedef linked_matrix_GJK::MNode MNode;
 typedef linked_matrix_GJK::LMatrix LMatrix;
 typedef linked_matrix_GJK::Column Column;
 

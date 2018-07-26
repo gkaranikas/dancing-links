@@ -51,7 +51,7 @@ bool DLX(LMatrix& M, S_Stack& solution, H_Stack& history)
     if( c == NULL ) { 
         return 1;
     }
-    for( Node *r = c->down(); r != static_cast<Node*>(c); r = r->down() ) {
+    for( MNode *r = c->down(); r != static_cast<MNode*>(c); r = r->down() ) {
         update(M, solution, history, r);
         if( DLX(M, solution, history) ) { 
             return 1;     
@@ -86,15 +86,15 @@ Column* choose_column(LMatrix& M)
 /*
  * 
  */
-void update(LMatrix& M, S_Stack& solution, H_Stack& history, Node *r) 
+void update(LMatrix& M, S_Stack& solution, H_Stack& history, MNode *r) 
 {
     solution.push_back(r->data().row_id);
     
     RC_Stack temp_stack;
     RC_Item temp_item;
 
-    for(Node * i = r->right(); i != r; i = i->right()) {
-        for(Node *j = i->up(); j != i; j = j->up() ) {
+    for(MNode * i = r->right(); i != r; i = i->right()) {
+        for(MNode *j = i->up(); j != i; j = j->up() ) {
             if(j->data().column_id == j) continue;
             M.remove_row(j);
             temp_item.node = j;
@@ -107,7 +107,7 @@ void update(LMatrix& M, S_Stack& solution, H_Stack& history, Node *r)
         temp_stack.push(temp_item);
     }
     
-    for(Node *j = r->up(); j != r; j = j->up() ) {
+    for(MNode *j = r->up(); j != r; j = j->up() ) {
         if(j->data().column_id == j) continue;
         M.remove_row(j);
         temp_item.node = j;

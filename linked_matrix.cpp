@@ -13,47 +13,47 @@ namespace linked_matrix_GJK
  * implementation of class LMatrix
  */
     
-LMatrix::LMatrix(void) : root( new MNode0( MData() ) )
+LMatrix::LMatrix(void) : root( new MNode( MData() ) )
 {   
     // make root->down_link constant somehow
     join_lr(root, root);
     row_count = 0;
 }
 
-LMatrix::LMatrix(bool **matrix, int m, int n) : root( new MNode0( MData() ) )
+LMatrix::LMatrix(bool **matrix, int m, int n) : root( new MNode( MData() ) )
 {   
     if( m == 0 || n == 0 ) {
         row_count = 0;
         return;
     }
     // create first column
-    MNode0 *c = new Column(MData(), 0);
-    c->data().column_id = static_cast<Column*>(c);        // point column object to itself
+    MNode *c = new Column(0);
+    //c->data().column_id = static_cast<Column*>(c);        // point column object to itself
     join_lr(root,c);
     // create column header objects
     for(int j = 1; j < n; j++) {
-        join_lr(c, new Column(MData(), 0) );
+        join_lr(c, new Column(0) );
         c = c->right();
-        c->data().column_id = static_cast<Column*>(c);
+        //c->data().column_id = static_cast<Column*>(c);
     }
     join_lr(c,root);
     
-    // initialize m x n array of MNode0 pointers
-    MNode0 ***ptr_matrix = new MNode0**[m];
+    // initialize m x n array of MNode pointers
+    MNode ***ptr_matrix = new MNode**[m];
     for(int k = 0; k < m; k++) {
-        ptr_matrix[k] = new MNode0*[n];
+        ptr_matrix[k] = new MNode*[n];
     }
     
     // create nodes of LMatrix, referenced by pointers in ptr_matrix
     // also link the nodes vertically
-    MNode0 *tmp;
+    MNode *tmp;
     c = root->right();
     // j = column of matrix, i = row of matrix
     for( int j = 0; j < n; j++, c = c->right() ) {
         tmp = c;
         for(int i = 0; i < m; i++) {
             if(matrix[i][j]) {
-                ptr_matrix[i][j] = new MNode0(MData(i,static_cast<Column*>(c)));
+                ptr_matrix[i][j] = new MNode(MData(i,static_cast<Column*>(c)));
                 join_du(ptr_matrix[i][j], tmp);
                 tmp = ptr_matrix[i][j];
                 (static_cast<Column *>(c))->add_to_size(1);
@@ -82,7 +82,7 @@ LMatrix::LMatrix(bool **matrix, int m, int n) : root( new MNode0( MData() ) )
 
     
     // link the nodes horizontally
-    MNode0 * first, *prev;
+    MNode * first, *prev;
     // i = row, j = column
     for(; i >= 0; i--) {
         first = NULL;
@@ -113,7 +113,7 @@ LMatrix::LMatrix(bool **matrix, int m, int n) : root( new MNode0( MData() ) )
     
 }
 
-MNode0* LMatrix::head() const
+MNode* LMatrix::head() const
 {
     return root;
 }
@@ -134,10 +134,10 @@ int LMatrix::num_rows() const
  * 
  * Note: 'row_id' fields are not changed by this operation
  */
-void LMatrix::remove_row(MNode0 * node)
+void LMatrix::remove_row(MNode * node)
 {   
     if(node == NULL || node == root || node->data().column_id == node ) return;
-    MNode0 *k = node;
+    MNode *k = node;
     do {
         join_du( k->down(), k->up() ); 
         k->data().column_id->add_to_size(-1);
@@ -150,9 +150,9 @@ void LMatrix::remove_row(MNode0 * node)
  * Precondition: 'node' points to a row which has been removed via a call to 'remove_row',
  *               and neither the row nor the calling object have been altered since
  */
-void LMatrix::restore_row(MNode0 * node)
+void LMatrix::restore_row(MNode * node)
 {
-    MNode0 *k = node;
+    MNode *k = node;
     do {
         k->up()->set_down(k);
         k->down()->set_up(k);
@@ -166,10 +166,10 @@ void LMatrix::restore_row(MNode0 * node)
  * Removes the column of the 'LMatrix' object containing the node pointed to by 'node'
  * Postcondition: the left, right, up, down links of nodes in the column are unchanged
  */
-void LMatrix::remove_column(MNode0 * node)
+void LMatrix::remove_column(MNode * node)
 {   
     if(node == NULL || node == root ) return;
-    MNode0 *k = node;
+    MNode *k = node;
     do {
         join_lr( k->left(), k->right() ); 
         k = k->up();
@@ -181,9 +181,9 @@ void LMatrix::remove_column(MNode0 * node)
  * Precondition: 'node' points to a row which has been removed via a call to 'remove_row',
  *               and neither the row nor the calling object have been altered since.
  */
-void LMatrix::restore_column(MNode0 * node)
+void LMatrix::restore_column(MNode * node)
 {
-    MNode0 *k = node;
+    MNode *k = node;
     do {
         k->right()->set_left(k);
         k->left()->set_right(k);
@@ -194,7 +194,7 @@ void LMatrix::restore_column(MNode0 * node)
 
 LMatrix::~LMatrix()
 {
-    MNode0 *a, *b, *del;
+    MNode *a, *b, *del;
     // a iterates through the column headers horizontally
     // b iterates through each column vertically
     a = root->right();
@@ -241,7 +241,7 @@ void DEBUG_display(LMatrix& M, std::ostream& ofs)
     ofs << ind;
     ofs << l << H << r;
 
-    MNode0 *node = M.head()->right();
+    MNode *node = M.head()->right();
     assert( node->left() == M.head() );
     while( node != M.head() ) {
         assert( node->data().row_id == -1 );
@@ -253,8 +253,8 @@ void DEBUG_display(LMatrix& M, std::ostream& ofs)
     ofs << ind << ind << "row " << -1 << endl;
     
     int rownum = 0;
-    MNode0 *colhead;
-    MNode0 *prev, *first;
+    MNode *colhead;
+    MNode *prev, *first;
     while(rownum < M.num_rows() ) {
         ofs << ind << sp << sp << sp;
         colhead = M.head()->right();
@@ -303,18 +303,18 @@ void DEBUG_display(LMatrix& M, std::ostream& ofs)
 
 
 /*****************************************************************************************************
- * implementation of MNode operations
+ * implementation of MNode_t operations
  */
 
 template<class T>
-void join_lr(MNode<T> *a, MNode<T> *b)
-{
+void join_lr(MNode_t<T> *a, MNode_t<T> *b)
+{   
     a->set_right(b);
     b->set_left(a);
 }
 
 template<class T>
-void join_du(MNode<T> *a, MNode<T> *b)
+void join_du(MNode_t<T> *a, MNode_t<T> *b)
 {
     a->set_up(b);
     b->set_down(a);
