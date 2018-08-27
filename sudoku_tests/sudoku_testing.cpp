@@ -1,7 +1,7 @@
 #include "../sudoku_solver.h"
 
-#include <iostream>
-#include <cassert>
+#include <ctime>
+#include <cstring>
 
 #define NUM_TESTS 3
 
@@ -14,107 +14,74 @@
 //
 //
 
-
-void grid_creator(int **grid, int size, int* flat_grid)
-{   
-    int j = 0;
-    for(int i = 0; i < size; i++) {
-        grid[i] = new int[size];
-        for(; j < (i+1)*size; j++) {
-            grid[i][j-i*size] = flat_grid[j];
-        }
-    }
-}
-
-void grid_deletor(int **grid, int size)
+void run_test_9x9(char *flat_grid_str, char *flat_grid_str_solved)
 {
-    for(int i = 0; i < size; i++) {
-        delete[] grid[i];
-    }
-    delete[] grid;
-}
-
-void grid_printer_ascii(int **grid, int size)
-{
-    // print sudoku grid
-    std::cout << '\t' << "SUDOKU GRID" << std::endl << std::endl;
-    for(int i = 0; i < size; i++) {
-        std::cout << '\t';
-        for(int j = 0; j < size; j++) {
-            std::cout << grid[i][j] << " ";
-        }
-        std::cout << std::endl;
-    }
-    std::cout << std::endl;
-}
-
-
-void run_test(int *flat_grid, int sqrt_of_size)
-{
-    int size = sqrt_of_size*sqrt_of_size;
-    int **grid = new int*[size];
-    grid_creator(grid,size,flat_grid);
-    grid_printer_ascii(grid,size);
-    sudoku_GJK::Sudoku_Solver(grid,sqrt_of_size);
-    grid_printer_ascii(grid,size);
-    grid_deletor(grid,size);
-}
-
-void test_helper_functions()
-{
+    sudoku_GJK::Sudoku<3> Sdku(flat_grid_str);
+    std::cout << "Problem:\n";
+    Sdku.display_ASCII();
+    std::cout << "Solving . . .\n";
+    std::clock_t start = std::clock();
+    Sdku.solve();
+    std::clock_t end = std::clock();
+    std::cout << "Solution:\n";
+    Sdku.display_ASCII();
+    std::cout << "Elapsed time = " << 1000.0 * (end-start)/CLOCKS_PER_SEC << " ms" << " (CPU time)\n";
     
+    sudoku_GJK::Sudoku<3> Sdku_solved(flat_grid_str_solved);
+    assert( Sdku == Sdku_solved );
+/*    
+    char solution_str[82];
+    for(int i = 0; i < 81; i++) {
+        int row=i%9+1;
+        int col=i+1-(row-1)*9;
+        solution_str[i] = (char)((int)Sdku.get_entry( row, col ) + '0');
+    }
+    solution_str[81] = '\0';
+    assert( std::strcmp(flat_grid_str_solved,solution_str) );
+*/
 }
+
 
 void test_0()
-{   
-    const int sqrt_of_size = 3;
-    const int size = 9;
-    int flat_grid[size*size] = {
-        5,3,0,0,7,0,0,0,0,
-        6,0,0,1,9,5,0,0,0,
-        0,9,8,0,0,0,0,6,0,
-        8,0,0,0,6,0,0,0,3,
-        4,0,0,8,0,3,0,0,1,
-        7,0,0,0,2,0,0,0,6,
-        0,6,0,0,0,0,2,8,0,
-        0,0,0,4,1,9,0,0,5,
-        0,0,0,0,8,0,0,7,9
-    };
-    int solved_grid[size*size] = {
-        5,3,4,6,7,8,9,1,2,
-        6,7,2,1,9,5,3,4,8,
-        1,9,8,3,4,2,5,6,7,
-        8,5,9,7,6,1,4,2,3,
-        4,2,6,8,5,3,7,9,1,
-        7,1,3,9,2,4,8,5,6,
-        9,6,1,5,3,7,2,8,4,
-        2,8,7,4,1,9,6,3,5,
-        3,4,5,2,8,6,1,7,9
-    };
-    run_test(flat_grid,sqrt_of_size);
-    // from wikipedia
-
+{    
+    // from the wikipedia sudoku page https://en.wikipedia.org/wiki/Sudoku
+    // accessed 27th August 2018
+    char puzzle_wkp[82] = 
+    "530070000600195000098000060800060003400803001700020006060000280000419005000080079";
+   //000000000000000000000000000000000000000000000000000000000000000000000000000000000  ---  81 0's, for alignment
+    
+    char puzzle_wkp_solved[82] = 
+    "534678912672195348198342567859761423426853791713924856961537284287419635345286179";
+    
+    run_test_9x9(puzzle_wkp,puzzle_wkp_solved);
 }
+
 
 void test_1()
 {
-    const int sqrt_of_size = 2;
-    const int size = 4;
-    int flat_grid[size*size] = {
-        1,0,4,0,
-        0,0,0,0,
-        0,2,0,1,
-        3,0,0,0
-    };
- //   int solved_grid[size*size] = {
- //   };
-    run_test(flat_grid,sqrt_of_size);
-
+    // from http://www.fiendishsudoku.com/ - fiendish puzzle for 6th August 2018
+    // 'degree of difficulty' not correlated with brute-force solving time
+    char puzzle_f060818[82] = 
+    "003050100060000080800090004000206000402000805000501000500060003030000020004070500";
+   
+    char puzzle_f060818_solved[82] = 
+    "943658172165724389827193654758246931412937865396581247571862493639415728284379516";
+    
+    run_test_9x9(puzzle_f060818,puzzle_f060818_solved);
 }
 
 void test_2()
-{
+{   
+    // a sudoku with only 17 clues (and diagonal symmetry incidentally)
+    // from https://en.wikipedia.org/wiki/Sudoku_solving_algorithms
+    // accessed 27th August 2018
+    char puzzle_17clue[82] = 
+    "000000001000000023004005000000100000000030600007000580000067000010004000520000000";
     
+    char puzzle_17clue_solved[82] = 
+    "672983451951476823384215976468159237295738614137642589843567192719824365526391748";
+    
+    run_test_9x9(puzzle_17clue,puzzle_17clue_solved);
 }
 
 /****************************************************************************************************

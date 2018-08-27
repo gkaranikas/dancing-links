@@ -1,10 +1,8 @@
 #include <vector>
 #include <stack>
+#include <iostream> // required for "linked_matrix.h"
 #include "linked_matrix.h"
 #include "dancing_links.h"
-#include "sudoku_solver.h"
-
-//#include "sudoku_solver.h"
 
 namespace dancing_links_GJK
 {
@@ -29,19 +27,16 @@ std::vector<int> Exact_Cover_Solver(bool **matrix, int m, int n)
     return solution;
 }
 
-// could adjust algorithm to find all solutions
-/* 
- * A PSEUDOCODE IMPLEMENTATION OF ALGORITHM X
- * 1. Let c be the column with the most 1's
- * IF   There are no columns:
- *     THEN    [matrix is empty => solution is complete =>] END ALGORITHM
- * ELSEIF   c has no 1's:
- *     THEN    downdate_matrix(); then go back to 1. 
- * 2. FOR each row r with a 1 in column c:
- *      update_matrix()
- *      Go to 1.
- * 
- */ 
+std::vector<int> Exact_Cover_Solver(LMatrix& M)
+{   
+    H_Stack history;
+    std::vector<int> solution;
+    solution.reserve(M.number_of_rows());
+    DLX(M, solution, history);
+    solution.shrink_to_fit();
+    return solution;
+}
+
  
  
 bool DLX(LMatrix& M, S_Stack& solution, H_Stack& history)

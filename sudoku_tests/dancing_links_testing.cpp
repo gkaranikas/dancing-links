@@ -8,7 +8,6 @@
 using linked_matrix_GJK::LMatrix;
 using linked_matrix_GJK::MNode0;
 using linked_matrix_GJK::Column;
-using linked_matrix_GJK::DEBUG_display;
 
 #include <vector>
 #include <stack>
@@ -109,21 +108,21 @@ void test_update_downdate()
     dancing_links_GJK::H_Stack history;
     MNode0* r = c->down();
     update(M,solution,history,r);
-    DEBUG_display(M);
+    M.DEBUG_display();
     cont();
     downdate(M,solution,history);
-    DEBUG_display(M);
+    M.DEBUG_display();
     cont(); 
     r = r->down();
     update(M,solution,history,r);
-    DEBUG_display(M);
+    M.DEBUG_display(M);
     cont();
     downdate(M,solution,history);       // seg faults - fixed now
-    DEBUG_display(M);
+    M.DEBUG_display(M);
     cont();
     r = r->down();
     update(M,solution,history,r);
-    DEBUG_display(M);
+    M.DEBUG_display(M);
     cont();
     downdate(M,solution,history);
     DEBUG_display(M);

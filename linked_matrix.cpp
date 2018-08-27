@@ -1,9 +1,7 @@
+#include <iostream>   // for 'DEBUG_display()'
 #include "linked_matrix.h"
+#include <cassert>    // for 'DEBUG_display()'
 
-// for 'DEBUG_display()'
-#include <cassert>
-#include <iostream>
-#include <fstream>
 using std::endl;
 
 namespace linked_matrix_GJK
@@ -123,17 +121,16 @@ bool LMatrix::is_trivial() const
     return root->right() == root && root->left() == root;
 }
 
-int LMatrix::num_rows() const
+int LMatrix::number_of_rows() const
 {
-    return row_count;
+    int num = 0;
+    for(MNode *node = root->right(); node != root; node = node->right() ) {
+        if(static_cast<Column*>(node)->size() > num) num = static_cast<Column*>(node)->size();
+    }
+    return num;
 }
 
-/*
- * Removes the row of the 'LMatrix' object containing the node pointed to by 'node'
- * Postcondition: the left, right, up, down links of nodes in the row are unchanged
- * 
- * Note: 'row_id' fields are not changed by this operation
- */
+
 void LMatrix::remove_row(MNode * node)
 {   
     if(node == NULL || node == root || node->data().column_id == node ) return;
@@ -145,27 +142,22 @@ void LMatrix::remove_row(MNode * node)
     } while( k != node ); // stop when we're back where we started
 }
 
-/*
- * Undoes the operations of 'remove_row'
- * Precondition: 'node' points to a row which has been removed via a call to 'remove_row',
- *               and neither the row nor the calling object have been altered since
- */
+
+
 void LMatrix::restore_row(MNode * node)
 {
     MNode *k = node;
     do {
-        k->up()->set_down(k);
-        k->down()->set_up(k);
+        k->up()->set_down(k);  // connect row back
+        k->down()->set_up(k);  // into the matrix
         k->data().column_id->add_to_size(1);
         k = k->left();
     } while( k != node );
 }
 
 
-/*
- * Removes the column of the 'LMatrix' object containing the node pointed to by 'node'
- * Postcondition: the left, right, up, down links of nodes in the column are unchanged
- */
+
+
 void LMatrix::remove_column(MNode * node)
 {   
     if(node == NULL || node == root ) return;
@@ -176,11 +168,7 @@ void LMatrix::remove_column(MNode * node)
     } while( k != node ); // stop when we're back where we started
 }
 
-/*
- * Undoes the operations of 'remove_row'
- * Precondition: 'node' points to a row which has been removed via a call to 'remove_row',
- *               and neither the row nor the calling object have been altered since.
- */
+
 void LMatrix::restore_column(MNode * node)
 {
     MNode *k = node;
@@ -214,18 +202,7 @@ LMatrix::~LMatrix()
 
 
 
-// row diagram
-//  >H<>C<>C<>C<    row -1
-//     >N<   >N<    row 0
-//                  row 1
-//        >N<>N<    row 2
-// column diagram
-// 0>H<0            col -1
-//  >C<>N<          col 0
-//  >C<      >N<    col 1
-//  >C<>N<   >N<    col 2
-
-void DEBUG_display(LMatrix& M, std::ostream& ofs)
+void LMatrix::DEBUG_display(std::ostream& ofs)
 {   
     const char l = '>';
     const char d = '<';
@@ -241,9 +218,9 @@ void DEBUG_display(LMatrix& M, std::ostream& ofs)
     ofs << ind;
     ofs << l << H << r;
 
-    MNode *node = M.head()->right();
-    assert( node->left() == M.head() );
-    while( node != M.head() ) {
+    MNode *node = root->right();
+    assert( node->left() == root );
+    while( node != root ) {
         assert( node->data().row_id == -1 );
         assert( node->right() != NULL );
         assert( node == node->right()->left() );
@@ -255,11 +232,11 @@ void DEBUG_display(LMatrix& M, std::ostream& ofs)
     int rownum = 0;
     MNode *colhead;
     MNode *prev, *first;
-    while(rownum < M.num_rows() ) {
+    while(rownum < row_count ) {
         ofs << ind << sp << sp << sp;
-        colhead = M.head()->right();
+        colhead = root->right();
         prev = NULL;
-        while(colhead != M.head()) {
+        while(colhead != root) {
             node = colhead->down();
             while(node != colhead && node->data().row_id != rownum) {
                 assert(node != NULL);
@@ -291,10 +268,10 @@ void DEBUG_display(LMatrix& M, std::ostream& ofs)
     }
     
     ofs << endl << endl;
-    ofs << ind << "COLUMN SIZE FIELDS" << endl << endl;
+    ofs << ind << "COLUMN SIZES" << endl << endl;
     ofs << ind;
-    node = M.head()->right();
-    while(node != M.head()) {
+    node =root->right();
+    while(node != root) {
         ofs << l << static_cast<Column*>(node)->size() << r;
         node = node->right();
     }
