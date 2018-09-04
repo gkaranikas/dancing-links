@@ -1,4 +1,4 @@
-.PHONY: clean tests
+.PHONY: clean tests objects
 #.PHONY: All
 
 HFILES=linked_matrix.h dancing_links.h sudoku_solver.h sudoku_solver.tpp
@@ -33,7 +33,8 @@ $(TESTDIR)/LMatrix_tests : $(TESTDIR)/LMatrix_tests.cpp linked_matrix.cpp linked
 $(TESTDIR)/MNode_tests : $(TESTDIR)/MNode_tests.cpp linked_matrix.cpp linked_matrix.h
 	$(CC) $< linked_matrix.cpp -o $@
 
-	
+objects : dancing_links.o linked_matrix.o
+
 dancing_links.o : dancing_links.cpp dancing_links.h linked_matrix.h
 	$(CC) $(CFLAGS) $<
 
