@@ -5,13 +5,12 @@
 
 #include "../linked_matrix.h"
 using linked_matrix_GJK::LMatrix;
-using linked_matrix_GJK::MNode0;
+using linked_matrix_GJK::MNode;
 using linked_matrix_GJK::Column;
 using linked_matrix_GJK::join_lr;
 using linked_matrix_GJK::join_du;
-using linked_matrix_GJK::DEBUG_display;
 
-#define NUM_TESTS 8
+#define NUM_TESTS 10
 
 /****************************************************************************************************
  *                                   IMPLEMENTATION OF TESTS
@@ -35,7 +34,7 @@ void test_empty()
     assert(( M.head()->data().column_id == NULL ));
     assert(( M.is_trivial() ));
     
-    DEBUG_display(M);
+    M.DEBUG_display();
     
 }
 
@@ -63,6 +62,16 @@ void matrix_deletor(bool **matrix, int m, int n)
     delete[] matrix;
 }
 
+// print diagram of linked matrix
+void matrix_printer(LMatrix& M)
+{
+    M.DEBUG_display();
+    std::cout << std::endl << "Is the diagram satisfactory? [Y/n]";
+    char in;
+    std::cin >> in;
+    assert( in == 'y' || in == 'Y');
+}
+
 void matrix_tester(bool **matrix,int m,int n)
 {
     LMatrix M(matrix,m,n);
@@ -78,12 +87,7 @@ void matrix_tester(bool **matrix,int m,int n)
     }
     std::cout << std::endl;
     
-    // print diagram of linked matrix
-    DEBUG_display(M);
-    std::cout << std::endl << "Is the diagram satisfactory? [Y/n]";
-    char in;
-    std::cin >> in;
-    assert( in == 'y' || in == 'Y');
+    matrix_printer(M);
 }
 
 void test_zeros()
@@ -190,6 +194,58 @@ void test_random()
     matrix_deletor(matrix,m,n);
 }
 
+
+void test_row_deletion()
+{
+    int m = 4, n = 4;
+    bool flat_matrix[4*4] = {
+        1,0,0,1,
+        1,1,0,1,
+        0,0,1,1,
+        1,1,0,1
+    };
+    bool **matrix = new bool*[m];
+    matrix_creator(matrix,m,n,flat_matrix);
+    LMatrix M(matrix,m,n);
+    M.DEBUG_display();
+    
+    MNode *node = M.head()->right()->right()->right()->down();
+    std::cout << std::endl << "Removing row 2" << std::endl << std::endl;
+    M.remove_row(node);
+    matrix_printer(M);
+    
+    std::cout << std::endl << "Restoring row 2" << std::endl << std::endl;
+    M.restore_row(node);
+    matrix_printer(M);
+    matrix_deletor(matrix,m,n);
+}
+
+void test_column_deletion()
+{
+    int m = 4, n = 4;
+    bool flat_matrix[4*4] = {
+        1,0,0,1,
+        1,1,0,1,
+        0,0,1,1,
+        1,1,0,1
+    };
+    bool **matrix = new bool*[m];
+    matrix_creator(matrix,m,n,flat_matrix);
+    LMatrix M(matrix,m,n);
+    M.DEBUG_display();
+    
+    MNode *node = M.head()->right()->right();
+    std::cout << std::endl << "Removing column 1" << std::endl << std::endl;
+    M.remove_column(node);
+    matrix_printer(M);
+    
+    std::cout << std::endl << "Restoring column 1" << std::endl << std::endl;
+    M.restore_column(node);
+    matrix_printer(M);
+    matrix_deletor(matrix,m,n);
+}
+
+
 /****************************************************************************************************
  *                             END OF IMPLEMENTATION OF TESTS
  * **************************************************************************************************/
@@ -204,7 +260,9 @@ const PROC tests[NUM_TESTS] = {
 &test_single_column,
 &test_interior_zero_row,
 &test_trailing_zero_row,
-&test_random
+&test_random,
+&test_row_deletion, 
+&test_column_deletion
 };
 
 // run all tests

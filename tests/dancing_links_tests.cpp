@@ -6,7 +6,7 @@
 
 #include "../linked_matrix.h"
 using linked_matrix_GJK::LMatrix;
-using linked_matrix_GJK::MNode0;
+using linked_matrix_GJK::MNode;
 using linked_matrix_GJK::Column;
 
 #include <vector>
@@ -102,11 +102,10 @@ void test_update_downdate()
 
     cont();
     
-    Column* c = choose_column(M);
-    assert( c == M.head()->right());
+    Column* c = static_cast<Column*>(M.head()->right());
     dancing_links_GJK::S_Stack solution;
     dancing_links_GJK::H_Stack history;
-    MNode0* r = c->down();
+    MNode* r = c->down();
     update(M,solution,history,r);
     M.DEBUG_display();
     cont();
@@ -115,24 +114,24 @@ void test_update_downdate()
     cont(); 
     r = r->down();
     update(M,solution,history,r);
-    M.DEBUG_display(M);
+    M.DEBUG_display();
     cont();
     downdate(M,solution,history);       // seg faults - fixed now
-    M.DEBUG_display(M);
+    M.DEBUG_display();
     cont();
     r = r->down();
     update(M,solution,history,r);
-    M.DEBUG_display(M);
+    M.DEBUG_display();
     cont();
     downdate(M,solution,history);
-    DEBUG_display(M);
+    M.DEBUG_display();
     cont();
     r = r->down();
     update(M,solution,history,r);
-    DEBUG_display(M);
+    M.DEBUG_display();
     cont();
     downdate(M,solution,history);
-    DEBUG_display(M);
+    M.DEBUG_display();
     cont();
 }
 
@@ -272,7 +271,7 @@ void test_sparse_matrix()
     //matrix_printer(matrix,m,n);
     LMatrix M(matrix,m,n);
 //    std::ofstream ofs(".\\lmatrix.txt",std::ofstream::app);
-//    DEBUG_display(M,ofs);
+//    M.DEBUG_display(ofs);
 //    ofs.close();
     std::vector<int> solution = Exact_Cover_Solver(matrix,m,n);
     std::cout << std::endl << '\t' << "SOLUTION" << std::endl << std::endl;
@@ -301,10 +300,8 @@ const PROC tests[NUM_TESTS] = {
 // run all tests
 int main() {
     bool TESTS[NUM_TESTS];  // will determine whether a given test is to be run or omitted
-    for(int i = 0; i < NUM_TESTS; i++) TESTS[i] = 0;
-    TESTS[0] = 0;
-    TESTS[6] = 1;
-    
+    for(int i = 0; i < NUM_TESTS; i++) TESTS[i] = 1;
+
 	for(int i = 0; i < NUM_TESTS; i++) {
 		if(TESTS[i]) {
 			tests[i]();

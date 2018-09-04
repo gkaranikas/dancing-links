@@ -1,3 +1,20 @@
+/*  
+    Copyright (C) 2018  Gregory J. Karanikas.
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 #include <iostream> // required for "linked_matrix.h" and for std::cout in Sudoku<>::print_ASCII method
 #include "linked_matrix.h"
 namespace dancing_links_GJK {
@@ -48,7 +65,7 @@ Sudoku<sqrt_of_size>::~Sudoku()
 template<int sqrt_of_size>
 void Sudoku<sqrt_of_size>::logic_solve()
 {
-    //! \todo Implement this method
+    // implement this method
 }
 
 template<int sqrt_of_size>
@@ -92,7 +109,7 @@ bool Sudoku<sqrt_of_size>::found(Triple<sqrt_of_size> triple)
 
 /*
  * 
- *            ________row conditions_________column_______square________point conditions____
+ *            ________row conditions_________column_______square________cell conditions_____
  *            |                          |            |            |                       |
  *          j | (r1,1) (r1,2) ... (r9,9) | (c1,1) ... | (s1,1) ... | (1,1) (1,2) ... (9,9) |
  *     i
@@ -109,7 +126,7 @@ void Sudoku<sqrt_of_size>::get_ECP_matrix(bool** matrix) {
     const int n = 4*size*size;
     
     std::div_t dv;
-    enum class Conditions {row=0, column=1, square=2, point=3} condition_type;
+    enum class Conditions {row=0, column=1, square=2, cell=3} condition_type;
     for(int i = 0; i < m; i++) {
         Triple<sqrt_of_size> triple(i);
         if(!grid[triple.row-1][triple.column-1].is_blank() && !found(triple))
@@ -117,9 +134,10 @@ void Sudoku<sqrt_of_size>::get_ECP_matrix(bool** matrix) {
             // incorporate specific sudoku problem data
             for(int j = 0; j < n; j++) matrix[i][j] = 0;
         } else {        // NOTE: if grid[triple.row-1][triple.column-1] == triple.value,
-                        // then the solution finding process can be sped up by removing
-                        // the appropriate rows and columns from the matrix
-                        // this is not incorporated yet
+                        // then the solution finding process can perhaps be sped up by removing
+                        // the appropriate rows and columns from the matrix and adding them
+                        // to the solution
+                        // this is a TODO
             for(int j = 0; j < n; j++) {
                 dv = std::div(j,size*size);
                 condition_type = (Conditions)dv.quot;     // between 0 and 3 inclusive
@@ -136,7 +154,7 @@ void Sudoku<sqrt_of_size>::get_ECP_matrix(bool** matrix) {
                     num_t<size> square(dv.quot+1), value(dv.rem+1);
                     matrix[i][j] = triple.is_in_square(square) && triple.value == value;
                 } 
-                else if(condition_type == Conditions::point) {
+                else if(condition_type == Conditions::cell) {
                     num_t<size> row(dv.quot+1), column(dv.rem+1);
                     matrix[i][j] = triple.row == row && triple.column == column;
                 }
@@ -145,8 +163,7 @@ void Sudoku<sqrt_of_size>::get_ECP_matrix(bool** matrix) {
     }
     
 }
-// skip the boolean matrix step altogether
-// void sudoku_to_LMatrix(int** grid, LMatrix& M);
+
 
 template<int sqrt_of_size>
 void Sudoku<sqrt_of_size>::convert_ECP_solution(std::vector<int> solution)

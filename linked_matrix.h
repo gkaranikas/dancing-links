@@ -1,3 +1,20 @@
+/*  
+    Copyright (C) 2018  Gregory J. Karanikas.
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 #ifndef LINKED_MATRIX_H
 #define LINKED_MATRIX_H
 
@@ -41,7 +58,7 @@ typedef MNode_t<MData> MNode;
  * amenable to the so-called ``Dancing Links'' algorithm of D. Knuth. 
  * 
  * The following is a helpful illustration of the LMatrix data structure taken from [this article](https://arxiv.org/pdf/cs/0011047.pdf) by Knuth.
- * ![An image of a linked matrix](/C:/Users/GJK/OneDrive/Documents/Projects/Sudoku/images/linked_matrix_image_(Knuth).png)
+ * ![An image of a linked matrix](../images/linked_matrix_image_(Knuth).png)
  * 
  * The data structure consists of a *root* or *head* node (got by calling \ref head() ) which is linked to the
  * *column headers* (objects of type \ref Column ), each of which represents a column of the matrix and whose
@@ -80,7 +97,7 @@ public:
      */
     void remove_row(MNode *node);
     /**
-     * @brief Undoes the action of \ref remove_row(node).
+     * @brief Undoes the action of \ref LMatrix#remove_row "remove_row"( @p node).
      * 
      * **Precondition** Neither the row containing @c node, nor the calling object have been altered since the
      * last call to \ref remove_row.
@@ -95,7 +112,7 @@ public:
      */
     void remove_column(MNode *node);
     /**
-     * @brief Undoes the action of \ref remove_column(node).
+     * @brief Undoes the action of \ref LMatrix#remove_column "remove_column"( @p node).
      * 
      * **Precondition** Neither the column containing @c node, nor the calling object have been altered since the
      * last call to \ref remove_column.

@@ -1,3 +1,20 @@
+/*  
+    Copyright (C) 2018  Gregory J. Karanikas.
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 #ifndef SUDOKU_SOLVER_H
 #define SUDOKU_SOLVER_H
 
@@ -17,39 +34,36 @@
      * The following terminology is helpful in reading the documentation as well as the source code.  A sudoku 
      * is an *n<sup>2</sup>* by *n<sup>2</sup>* grid (where *n<sup>2</sup>* is the **size** of the sudoku), 
      * each **cell** of which holds a **value**.  A cell is specified by **row** and **column** indices, each
-     * ranging from *1* to *n*.  A value can be any number from *1* to *n*, or the value
+     * ranging from *1* to *n<sup>2</sup>*.  A value can be any number from *1* to *n<sup>2</sup>*, or the value
      * *0* which represents a blank cell.  A **triple** consists of a cell plus a value.  A **square** is an
      * *n* by *n* sub-grid (thus a sudoku has *n* squares).
  */
 
 /**
-    \brief Functions for converting sudoku to exact cover problems and solving sudoku.
+    \brief Contains the Sudoku class.
  */
 namespace sudoku_GJK
 {
 
 
-/** \brief Class for @c int's in the range <tt>0 . . size</tt>
+/** \brief Wrapper class for @c int's in the range <tt>0 . . size</tt>
  * 
- * Represents row indices, column indices, and values.  Basically a wrapper for @c int which ensures correct range.
+ * Is used to represent row indices, column indices, and values in a sudoku.
  */
 template<int size>
 class num_t {
-public:
-//    static const num_t NO_VALUE; 
-    num_t(int n=0) : _n(n) { assert(0<=n && n<=size); } //!< Converts @int to \ref num_t, checking that number is in range
-    bool is_blank() const {return _n == 0;}  //!< Whether the object represents a blank/undetermined value
+public: 
+    num_t(int n=0) : _n(n) { assert(0<=n && n<=size); } //!< Converts @c int to \ref num_t, checking that number is in range
+    bool is_blank() const {return _n == 0;}  //!< Whether the object represents a blank/undetermined value (=0)
     operator int() const { return _n; }     //!< Operator for conversion to @c int
     num_t & operator=(const num_t & rhs) { _n = rhs._n; return *this;}
 private:
     int _n;
 };
 
-//template<int size>
-//const num_t<size> NO_VALUE(0);
 
 /**
- * @brief Represents a sudoku triple (see )
+ * @brief Represents a sudoku triple.
  */
 template<int sqrt_of_size>
 struct Triple {
@@ -124,15 +138,18 @@ public:
             }
         } return true;
     }
-    //! Perform logical operations to partially solve a sudoku
+    /** \brief Perform logical operations to partially solve a sudoku
+     * 
+     * \todo Implement this method.
+     */
     void logic_solve();
 /**
  * @brief Solves the sudoku puzzle
  *
- * Uses \ref dancing_links_GJK::Exact_Cover_Solver().
+ * Converts the sudoku to an Exact Cover Problem represented by a \ref linked_matrix_GJK::LMatrix
+ * and calls \ref dancing_links_GJK::Exact_Cover_Solver(linked_matrix_GJK::LMatrix&).
  */
     void solve();
-    void get_ECP_matrix(bool** matrix);
 /**
  \brief Displays the sudoku using ASCII characters.
 
@@ -160,6 +177,7 @@ The format is demonstrated in the following sample output:
 private:
     static const int size = sqrt_of_size*sqrt_of_size;
     num_t<size> **grid;
+    void get_ECP_matrix(bool** matrix);
     void convert_ECP_solution(std::vector<int> solution);
 };
 

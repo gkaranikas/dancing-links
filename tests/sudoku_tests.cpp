@@ -9,10 +9,6 @@
  *                                   IMPLEMENTATION OF TESTS
  * **************************************************************************************************/
 
-// TEST CASES
-//
-//
-//
 
 void run_test_9x9(char *flat_grid_str, char *flat_grid_str_solved)
 {
@@ -29,16 +25,7 @@ void run_test_9x9(char *flat_grid_str, char *flat_grid_str_solved)
     
     sudoku_GJK::Sudoku<3> Sdku_solved(flat_grid_str_solved);
     assert( Sdku == Sdku_solved );
-/*    
-    char solution_str[82];
-    for(int i = 0; i < 81; i++) {
-        int row=i%9+1;
-        int col=i+1-(row-1)*9;
-        solution_str[i] = (char)((int)Sdku.get_entry( row, col ) + '0');
-    }
-    solution_str[81] = '\0';
-    assert( std::strcmp(flat_grid_str_solved,solution_str) );
-*/
+
 }
 
 
