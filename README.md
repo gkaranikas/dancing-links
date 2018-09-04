@@ -1,6 +1,6 @@
 # Dancing Links and Sudoku
 
-This project is a C++ implementation of Donald Knuth's [Dancing Links](https://en.wikipedia.org/wiki/Dancing_Links) algorithm for the [exact cover problem](https://en.wikipedia.org/wiki/Exact_cover_problem), as well as a sudoku solver based upon it.
+This project includes a C++ implementation of Donald Knuth's [Dancing Links](https://en.wikipedia.org/wiki/Dancing_Links) algorithm for the [exact cover problem](https://en.wikipedia.org/wiki/Exact_cover_problem), as well as a sudoku solver based upon it.
 
 ## Background
 The **exact cover problem** can be stated as follows.  Given a rectangular boolean matrix, delete rows to get a submatrix with exactly one 1 in each column.  It is known to be NP-complete, and the fastest known solutions use backtracking/trial-and-error methods.  The **Dancing Links** algorithm is no exception; however, by representing the columns and rows of the matrix by circular doubly linked lists, great savings are made in the common scenario of a sparse matrix.  See the above wikipedia link for more information.
