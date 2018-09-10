@@ -16,7 +16,7 @@ using dancing_links_GJK::choose_column;
 using dancing_links_GJK::update;
 using dancing_links_GJK::downdate;
 using dancing_links_GJK::DLX;
-#include "../sudoku_solver.h"
+
 using dancing_links_GJK::Exact_Cover_Solver;
 
 #define NUM_TESTS 7
